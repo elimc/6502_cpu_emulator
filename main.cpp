@@ -30,8 +30,14 @@ struct Mem
         }
     }
 
-    // read 1 byte
+    /* read 1 byte */
     byte operator[]( u32 Address ) const {
+        // assert( Address < MAX_MEM );
+        return Data[Address];
+    }
+
+    /* write 1 byte */
+    byte &operator[]( u32 Address ) {
         // assert( Address < MAX_MEM );
         return Data[Address];
     }
@@ -64,11 +70,39 @@ struct CPU
         return Data;
     }
 
+    // opcodes
+    static constexpr byte
+        INS_LDA_IM = 0xA9;
+
+    static constexpr byte
+        INS_LDA_ZP = 0xA5;
+
     void execute( u32 Cycles, Mem &memory)
     {
         while ( Cycles > 0 )
         {
             byte Ins = fetch_byte( Cycles, memory );
+            switch ( Ins )
+            {
+                case INS_LDA_IM:
+                {
+                    byte Value = fetch_byte( Cycles, memory );
+                    A = Value;
+                    Z = ( A == 0 );
+                    N = ( A & 0b10000000 ) > 0;
+                } break;
+                case INS_LDA_ZP:
+                {
+                    byte ZeroPageAddress = fetch_byte( Cycles, memory );
+                    A = memory[ZeroPageAddress];
+                    Z = ( A == 0 );
+                    N = ( A & 0b10000000 ) > 0;
+                } break;
+                default:
+                {
+                    printf( "Instruction not handled %d", Ins );
+                } break;
+            }
         }
         
     }
@@ -81,6 +115,9 @@ int main ()
     CPU cpu;
 
     cpu.reset( mem );
+    mem[0xFFFC] = CPU::INS_LDA_IM;
+    mem[0xFFFD] = 0x42;
+    mem[0x0042] = 0x84;
     cpu.execute( 2, mem );
 
     return 0;

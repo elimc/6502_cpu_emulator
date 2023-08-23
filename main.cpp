@@ -5,14 +5,6 @@
 #include <assert.h>
 #include <math.h>
 #include <time.h>
-#include <algorithm>
-#include <iostream>
-#include <vector>
-#include <string>
-#include <map>
-#include <set>
-#include <queue>
-#include <stack>
 
 using byte = unsigned char;
 using word = unsigned short;
